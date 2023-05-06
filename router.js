@@ -56,17 +56,17 @@ const operations = async (opType, body) => {
 
 router.post('/logging/:collection', async (req, res) => {
   const routeTag = `${req.method} @/logging/${req.params.collection}`
-  console.log(`${routeTag}: ${new Date().toString()}`)
-  console.log(`${JSON.stringify(req.body, null, 4)}`)
-  console.log()
-  console.log()
+  // console.log(`${routeTag}: ${new Date().toString()}`)
+  // console.log(`${JSON.stringify(req.body, null, 4)}`)
+  // console.log()
+  // console.log()
 
 
   if (req.body?.operations) {
 
     try {
       const body = req.body
-      console.log('====OPERATTIONS====')
+      console.log('====OPERATIONS====')
       console.log(JSON.stringify({ ...body.operations }, null, 4))
       console.log()
       console.log()
@@ -140,42 +140,61 @@ router.post('/ops/:type', async (req, res) => {
   }
 })
 
+router.post('/api/:endpoint', (req, res) => {
+  console.log(`${req.method} from ${req.hostname} to ${req.path}`)
+  // console.log(`headers: ${
+  //   JSON.stringify(req.headers,null,4)
+  // }`)
+
+  console.log(`params: ${
+    JSON.stringify(req.params.endpoint,null,4)
+  }`)
+
+  console.log(`body: ${
+    JSON.stringify(req.body,null,4)
+  }`)
+
+  res.status(200).send('Ok!')
+})
+
+
 module.exports = router
 
-let copyProjectionToCollection = async () => {
+// Copy projection to a new collection
+// let copyProjectionToCollection = async () => {
 
-  const query = [
-    { $addFields: { 'agent_name': '$data.name' } },
-    { $addFields: { 'description': '$data.description' } },
+//   const query = [
+//     { $addFields: { 'agent_name': '$data.name' } },
+//     { $addFields: { 'description': '$data.description' } },
 
-    {
-      $project: {
-        _id: 1,
-        agent_name: 1,
-        description: 1,
-        data: 1,
-      }
-    },
-  ]
+//     {
+//       $project: {
+//         _id: 1,
+//         agent_name: 1,
+//         description: 1,
+//         data: 1,
+//       }
+//     },
+//   ]
 
 
-  return fetch(
-    "http://localhost:5050/ops/query", {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      collectionName: "state-logs",
-      query: query,
-      destination: 'primary-agent-3698-Vivacious-Smile'
-    })
-  })
-    .then(res => res.json())
-    .then(body => console.log(body))
+//   return fetch(
+//     "http://localhost:5050/ops/query", {
+//     method: 'POST',
+//     headers: {
+//       'Accept': 'application/json',
+//       'Content-Type': 'application/json'
+//     },
+//     body: JSON.stringify({
+//       collectionName: "state-logs",
+//       query: query,
+//       destination: '3698-Vivacious-Smile'
+//     })
+//   })
+//     .then(res => res.json())
+//     .then(body => console.log(body))
 
-}
+// }
 
 // tool thoughts query pipeline:
 // [
