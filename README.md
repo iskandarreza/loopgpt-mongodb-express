@@ -1,12 +1,12 @@
 # loopgp-mongodb-express
  Express server microservice to relay data from loopgpt agent to MongoDB Atlas
 
- Installation:
+ Install packages:
  ```bash
- npm install
+ npm setup
  ```
 
- Start microservice:
+ Start server microservice:
  ```bash
  npm start
  ```
