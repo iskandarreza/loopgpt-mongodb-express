@@ -2,6 +2,7 @@ from loopgpt.tools.agent_manager import MessageAgent, ListAgents
 from loopgpt.tools.base_tool import BaseTool
 from uuid import uuid4
 
+import sys
 import loopgpt
 import json
 import requests
@@ -272,7 +273,7 @@ class DebugWrapper(AgentClusterWrapper):
         """)
         print(f"name: {main_agent.name}")
         print(f"description: {main_agent.description}")
-        print(f"tools: {main_agent.tools_prompt()}")
+        # print(f"tools: {main_agent.tools_prompt()}")
 
         
         print("""
@@ -297,15 +298,15 @@ print("""
         agents roster
         """)
 print(debugger.agents_roster)
-agents = debugger.agents 
-main_agent_id = list(agents.keys())[0] # get ref to agent object in the list 
-secondary_agent_id = list(agents.keys())[1]
+# agents = debugger.agents 
+# main_agent_id = list(agents.keys())[0] # get ref to agent object in the list 
+# secondary_agent_id = list(agents.keys())[1]
 
 # You could run this whole file as a module with `python -m debug_wrapper` in the bash shell
 # or you could launch the python shell and exec the file if you want to continue debugging after the 
 # end of the initially set number of cycles. `exec(open('debug_wrapper.py').read())`
 
-debugger.run_loop(agent=agents[main_agent_id][0], count=3)
+# debugger.run_loop(agent=agents[main_agent_id][0], count=3)
 
 # print(main_agent[0].tools["list_agents"].run())
 # print(main_agent[0].tools["message_agent"].run(secondary_agent, "Hello, respond please"))
@@ -313,3 +314,5 @@ debugger.run_loop(agent=agents[main_agent_id][0], count=3)
 # main_agent = debugger.agents[main_agent_id][0]
 # print(debugger.agents[main_agent_id][0].sub_agents)
 # debugger.agents['67baa308'][0]
+
+sys.stdout.flush()
