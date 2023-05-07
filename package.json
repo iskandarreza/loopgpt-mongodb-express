@@ -4,7 +4,7 @@
   "description": "Express server microservice to relay data from loopgpt agent to MongoDB Atlas",
   "main": "index.js",
   "scripts": {
-    "setup": "npm install && node loopgpt/setup.js", 
+    "setup": "npm install && node loopgpt-bridge/setup.js", 
     "start": "nodemon index.js"
   },
   "license": "MIT",

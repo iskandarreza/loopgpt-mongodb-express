@@ -141,7 +141,9 @@ router.post('/ops/:type', async (req, res) => {
 })
 
 router.post('/api/:endpoint', (req, res) => {
-  console.log(`${req.method} from ${req.hostname} to ${req.path}`)
+  console.log(`
+  
+  ${req.method} from ${req.hostname} to ${req.path}`)
   // console.log(`headers: ${
   //   JSON.stringify(req.headers,null,4)
   // }`)
