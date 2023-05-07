@@ -4,8 +4,10 @@
   "description": "Express server microservice to relay data from loopgpt agent to MongoDB Atlas",
   "main": "index.js",
   "scripts": {
-    "setup": "npm install && node loopgpt-bridge/setup.js", 
-    "start": "nodemon index.js"
+    "setup": "npm install && node loopgpt-bridge/setup.js",
+    "start": "nodemon index.js",
+    "run": "node loopgpt-bridge/run.js",
+    "format": "prettier --write --no-semi \"**/*.{js,md}\""
   },
   "license": "MIT",
   "dependencies": {
@@ -15,5 +17,8 @@
     "mongodb": "^5.3.0",
     "nodemon": "^2.0.22",
     "python-shell": "^5.0.0"
+  },
+  "devDependencies": {
+    "prettier": "^2.8.8"
   }
 }

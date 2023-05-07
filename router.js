@@ -1,11 +1,11 @@
-const express = require('express')
+const express = require("express")
 const router = express.Router()
-const dbo = require('./conn')
+const dbo = require("./conn")
 
 const operations = async (opType, body) => {
   const db_connect = await dbo.getDb()
 
-  if (opType === 'copy-collection-docs') {
+  if (opType === "copy-collection-docs") {
     const collection = body.collectionName
     const destination = body.destination
     const sourceCollection = db_connect.collection(collection)
@@ -17,7 +17,9 @@ const operations = async (opType, body) => {
       await cursor.forEach(async (doc) => {
         const result = await destCollection.findOne({ _id: doc._id })
         if (result) {
-          console.log(`Document with _id: ${doc._id} already exists in destination collection`)
+          console.log(
+            `Document with _id: ${doc._id} already exists in destination collection`
+          )
         } else {
           const insertResult = await destCollection.insertOne(doc)
           console.log(`Inserted document with _id: ${insertResult.insertedId}`)
@@ -25,15 +27,11 @@ const operations = async (opType, body) => {
         }
       })
       return { status: `${insertedCount} records copied successfully` }
-
     } catch (error) {
       const response = { error: error }
       return response
     }
-
-
-  } else if (opType === 'query') {
-
+  } else if (opType === "query") {
     const records = await db_connect
       .collection(body.collectionName)
       .aggregate(body.query)
@@ -48,25 +46,22 @@ const operations = async (opType, body) => {
     } else {
       return records
     }
-
   } else {
     return {}
   }
 }
 
-router.post('/logging/:collection', async (req, res) => {
+router.post("/logging/:collection", async (req, res) => {
   const routeTag = `${req.method} @/logging/${req.params.collection}`
   // console.log(`${routeTag}: ${new Date().toString()}`)
   // console.log(`${JSON.stringify(req.body, null, 4)}`)
   // console.log()
   // console.log()
 
-
   if (req.body?.operations) {
-
     try {
       const body = req.body
-      console.log('====OPERATIONS====')
+      console.log("====OPERATIONS====")
       console.log(JSON.stringify({ ...body.operations }, null, 4))
       console.log()
       console.log()
@@ -75,14 +70,11 @@ router.post('/logging/:collection', async (req, res) => {
       const response = await operations(type, { collectionName, destination })
       console.log(response)
       return res.status(200).json(response)
-
     } catch (error) {
-      console.log('Error:', error)
+      console.log("Error:", error)
       res.status(500).json(error)
     }
-
   } else {
-
     try {
       const db_connect = await dbo.getDb()
 
@@ -101,7 +93,6 @@ router.post('/logging/:collection', async (req, res) => {
         dateAdded: new Date().toISOString(),
         ...(agentName && { agentName }),
         ...(description && { description }),
-
       }
 
       db_connect
@@ -115,16 +106,13 @@ router.post('/logging/:collection', async (req, res) => {
           res.json(e)
           console.log(e)
         })
-
     } catch (error) {
       console.log(`ERROR ${routeTag}:`, { error, body: req.body })
     }
-
   }
-
 })
 
-router.post('/ops/:type', async (req, res) => {
+router.post("/ops/:type", async (req, res) => {
   try {
     const opType = req.params.type
     const body = {
@@ -140,7 +128,7 @@ router.post('/ops/:type', async (req, res) => {
   }
 })
 
-router.post('/api/:endpoint', (req, res) => {
+router.post("/api/:endpoint", (req, res) => {
   console.log(`
   
   ${req.method} from ${req.hostname} to ${req.path}`)
@@ -148,17 +136,12 @@ router.post('/api/:endpoint', (req, res) => {
   //   JSON.stringify(req.headers,null,4)
   // }`)
 
-  console.log(`params: ${
-    JSON.stringify(req.params.endpoint,null,4)
-  }`)
+  console.log(`params: ${JSON.stringify(req.params.endpoint, null, 4)}`)
 
-  console.log(`body: ${
-    JSON.stringify(req.body,null,4)
-  }`)
+  console.log(`body: ${JSON.stringify(req.body, null, 4)}`)
 
-  res.status(200).send('Ok!')
+  res.status(200).send("Ok!")
 })
-
 
 module.exports = router
 
@@ -178,7 +161,6 @@ module.exports = router
 //       }
 //     },
 //   ]
-
 
 //   return fetch(
 //     "http://localhost:5050/ops/query", {
@@ -241,4 +223,3 @@ module.exports = router
 //   },
 //   //{ $count: 'totalDocs' }
 // ]
-
