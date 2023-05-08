@@ -10,13 +10,17 @@ const options = {
   },
   encoding: "binary", // Set the encoding to binary
   args: [],
-  timeout: 10000,
+  timeout: 0, // run indefinitely until thread exits
 }
 
 const pyshell = new PythonShell("bridge.py", options)
 
 pyshell.on("message", (output) => {
   console.log("Python script output:", output)
+})
+
+pyshell.on("error", (err) => {
+  console.error("Error from Python script:", err)
 })
 
 pyshell.end((err) => {
