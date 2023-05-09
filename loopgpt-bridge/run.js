@@ -9,14 +9,42 @@ const options = {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   },
   encoding: "binary", // Set the encoding to binary
-  args: [],
+  args: [
+    "--name", "3148-Graceful-Sprint",
+    "--max_cycles", "1"
+  ],
   timeout: 0, // run indefinitely until thread exits
 }
 
 const pyshell = new PythonShell("bridge.py", options)
 
 pyshell.on("message", (output) => {
-  console.log("Python script output:", output)
+  try {
+    if (output && JSON.parse(output)) {
+      const parsed = JSON.parse(output)
+      const props = ["init_state", "init_thoughts", "this_cycle", "message"]
+      let categorized = false
+    
+      for (const prop of props) {
+        if (parsed[prop]) {
+          if (prop === "message") {
+            console.log(parsed[prop])
+          } else {
+            console.log(prop, parsed[prop])            
+          }
+          categorized = true
+        }
+      }
+    
+      if (!categorized) {
+        console.log("parsed", parsed)
+      }
+    }
+    
+    
+  } catch (error) {
+    console.log("Unable to parse output to JSON: ", output)
+  }
 })
 
 pyshell.on("error", (err) => {
