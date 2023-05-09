@@ -44,7 +44,7 @@ def main():
     agent.tools.update(new_tool_set)
 
     cycle_output = {}
-    cycle_output["cycle"] = 0
+    cycle_output["cycle"] = 1
     max_cycles = int(args.max_cycles)
 
     print(json.dumps({"init_state": agent.config()}))
@@ -112,12 +112,20 @@ def main():
                     # next in the chain starts here
                     resp = agent.chat(run_tool=True)
                     tool_results = agent.tool_response
-                    cycle_output["cycle"] += 1
                     cycle_output["tool_results"] = tool_results
                     cycle_output["next_resp"] = resp
 
                     if "command" in resp:
-                        cycle_output["next_command"] = resp["command"]
+                        next_command = resp["command"]
+
+                        if (
+                            isinstance(next_command, dict)
+                            and "name" in next_command
+                            and "args" in next_command
+                        ):
+                            cycle_output["next_command"] = next_command
+                        else:
+                            cycle_output["next_command"] = resp["command"]
 
                     next_thoughts = {}
                     if "thoughts" in resp:
@@ -152,6 +160,8 @@ def main():
                     post_body["cycle_output"] = cycle_output
                     post_body["cycle_config"] = cycle_config
                     post_data(post_body, url_param, endpoint)
+
+                    cycle_output["cycle"] += 1
                     continue
 
 
