@@ -1,11 +1,11 @@
-const express = require("express")
+const express = require('express')
 const router = express.Router()
-const dbo = require("./conn")
+const dbo = require('./conn')
 
 const operations = async (opType, body) => {
   const db_connect = await dbo.getDb()
 
-  if (opType === "copy-collection-docs") {
+  if (opType === 'copy-collection-docs') {
     const collection = body.collectionName
     const destination = body.destination
     const sourceCollection = db_connect.collection(collection)
@@ -31,7 +31,7 @@ const operations = async (opType, body) => {
       const response = { error: error }
       return response
     }
-  } else if (opType === "query") {
+  } else if (opType === 'query') {
     const records = await db_connect
       .collection(body.collectionName)
       .aggregate(body.query)
@@ -51,7 +51,7 @@ const operations = async (opType, body) => {
   }
 }
 
-router.post("/logging/:collection", async (req, res) => {
+router.post('/logging/:collection', async (req, res) => {
   const routeTag = `${req.method} @/logging/${req.params.collection}`
   // console.log(`${routeTag}: ${new Date().toString()}`)
   // console.log(`${JSON.stringify(req.body, null, 4)}`)
@@ -61,7 +61,7 @@ router.post("/logging/:collection", async (req, res) => {
   if (req.body?.operations) {
     try {
       const body = req.body
-      console.log("====OPERATIONS====")
+      console.log('====OPERATIONS====')
       console.log(JSON.stringify({ ...body.operations }, null, 4))
       console.log()
       console.log()
@@ -71,7 +71,7 @@ router.post("/logging/:collection", async (req, res) => {
       console.log(response)
       return res.status(200).json(response)
     } catch (error) {
-      console.log("Error:", error)
+      console.log('Error:', error)
       res.status(500).json(error)
     }
   } else {
@@ -112,7 +112,7 @@ router.post("/logging/:collection", async (req, res) => {
   }
 })
 
-router.post("/ops/:type", async (req, res) => {
+router.post('/ops/:type', async (req, res) => {
   try {
     const opType = req.params.type
     const body = {
@@ -128,7 +128,7 @@ router.post("/ops/:type", async (req, res) => {
   }
 })
 
-router.post("/api/:endpoint", (req, res) => {
+router.post('/api/:endpoint', (req, res) => {
   console.log(`
   
   ${req.method} from ${req.hostname} to ${req.path}`)
@@ -140,7 +140,7 @@ router.post("/api/:endpoint", (req, res) => {
 
   console.log(`body: ${JSON.stringify(req.body, null, 4)}`)
 
-  res.status(200).send("Ok!")
+  res.status(200).send('Ok!')
 })
 
 module.exports = router

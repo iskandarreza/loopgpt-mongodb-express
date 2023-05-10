@@ -7,7 +7,7 @@
     "setup": "npm install && node loopgpt-bridge/setup.js",
     "start": "nodemon index.js",
     "run": "node loopgpt-bridge/run.js",
-    "format": "prettier --write --no-semi \"**/*.{js,md}\""
+    "format": "prettier --write --no-semi --single-quote \"**/*.{js,md}\""
   },
   "license": "MIT",
   "dependencies": {
