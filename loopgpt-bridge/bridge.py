@@ -10,6 +10,8 @@ from uuid import uuid4
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', type=str, required=True)
 parser.add_argument('--max_cycles', type=int, required=True)
+parser.add_argument('--goals', type=str, required=False)
+parser.add_argument('--constraints', type=str, required=False)
 args = parser.parse_args()
 
 sys.stdout.reconfigure(encoding='utf-8')
@@ -30,6 +32,7 @@ def main():
     agent = loopgpt.Agent()
     agent.name = f"{args.name}"
     agent.goals = "Run the list_files command and then the list_agents command, then complete the task"
+    agent.constraints = ""
     agent.progress = []  # bug fix https://github.com/farizrahman4u/loopgpt/issues/41
 
     # trim the number of tools available
@@ -41,6 +44,7 @@ def main():
 
     cycle_output = {}
     cycle_output["cycle"] = 1
+    cycle_id = uuid4().hex[:8]
     max_cycles = int(args.max_cycles)
 
     init_state = agent.config()
@@ -146,8 +150,28 @@ def main():
 
                     })
 
-                    this_cycle["id"] = uuid4().hex[:8]
+                    this_cycle["id"] = cycle_id
+                    cycle_config = agent.config()
                     print(json.dumps({"this_cycle": this_cycle}))
+
+                    current_state = {}
+                    current_state["cycle"] = cycle_output["cycle"]
+                    current_state["cycle_id"] = cycle_id
+                    current_state["agent_state"] = agent.config()
+                    print(json.dumps({"current_state": current_state}))
+
+                    post_body = {}
+                    url_param = "debug_logger"
+                    endpoint = "http://localhost:5050/api/"
+                    
+                    post_body["init_config"] = init_state
+                    post_body["init_response"] = init_resp
+                    post_body["cycle_output"] = cycle_output
+                    post_body["cycle_config"] = cycle_config
+                    post_body["cycle_id"] = cycle_id
+                    post_data(post_body, url_param, endpoint)
+
+                    cycle_output["cycle"] += 1
 
                     # cycle count exit condition
                     if cycle_output["cycle"] >= max_cycles:
@@ -156,20 +180,11 @@ def main():
                             "content":"Max cycles reached. Terminating."
                         }}))
                         return
-
-                    post_body = {}
-                    url_param = "debug_logger"
-                    endpoint = "http://localhost:5050/api/"
-                    cycle_config = agent.config()
-                    post_body["init_config"] = init_state
-                    post_body["init_response"] = init_resp
-                    post_body["cycle_output"] = cycle_output
-                    post_body["cycle_config"] = cycle_config
-                    post_data(post_body, url_param, endpoint)
-
-                    cycle_output["cycle"] += 1
+                    
                     continue
 
 
 main()
+# print(args)
+
 sys.stdout.flush()
