@@ -18,7 +18,7 @@ io.engine.on("headers", (headers, req) => {
   headers["Access-Control-Allow-Origin"] = "http://localhost:3000";
 })
 
-Object.keys(io.sockets.sockets).forEach(function(s) {
+Object.keys(io.sockets.sockets).forEach(function (s) {
   io.sockets.sockets[s].disconnect(true);
 })
 
@@ -72,7 +72,7 @@ io.on("connection", (socket) => {
       timeout: 0,
     }
 
-      runPythonScript(options, socket)
+    runPythonScript(options, socket)
   })
 
   socket.on("disconnect", () => {
@@ -102,15 +102,8 @@ function runPythonScript(options, socket) {
 
         for (const prop of props) {
           if (parsed[prop]) {
-            if (prop === "message") {
-              socket.emit("message", parsed[prop])
-              console.log(parsed[prop])
-
-            } else {
-              socket.emit(prop, parsed[prop])
-              console.log(prop, parsed[prop])
-
-            }
+            socket.emit(prop, parsed[prop])
+            console.log(prop, parsed[prop])
             categorized = true
           }
         }

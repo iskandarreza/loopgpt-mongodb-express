@@ -5,6 +5,7 @@ import json
 import requests
 
 from tool_config import ToolConfig
+from uuid import uuid4
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', type=str, required=True)
@@ -29,11 +30,6 @@ def main():
     agent = loopgpt.Agent()
     agent.name = f"{args.name}"
     agent.goals = "Run the list_files command and then the list_agents command, then complete the task"
-    agent_init_config = agent.config()  # save init config
-
-    # print(agent_init_config["tools"])
-    agent.clear_state()  # start fresh
-    agent.from_config(agent_init_config)  # reload cleared config
     agent.progress = []  # bug fix https://github.com/farizrahman4u/loopgpt/issues/41
 
     # trim the number of tools available
@@ -41,13 +37,16 @@ def main():
     custom_tool_kit = tool_config.web_tools + tool_config.agent_tools
     default_tool_set = agent.tools
     new_tool_set = tool_config.add_tools(tool_set=default_tool_set, tool_kit=custom_tool_kit)
-    agent.tools.update(new_tool_set)
+    agent.tools = new_tool_set
 
     cycle_output = {}
     cycle_output["cycle"] = 1
     max_cycles = int(args.max_cycles)
 
-    print(json.dumps({"init_state": agent.config()}))
+    init_state = agent.config()
+    init_state["id"] = uuid4().hex[:8]
+    init_state["cycle"] = cycle_output["cycle"]
+    print(json.dumps({"init_state": init_state}))
 
     resp = agent.chat()
     init_resp = resp
@@ -57,6 +56,8 @@ def main():
             init_thoughts = init_resp["thoughts"]
 
             if isinstance(init_thoughts, dict):
+                init_thoughts["id"] = uuid4().hex[:8]
+                init_thoughts["cycle"] = cycle_output["cycle"]
                 print(json.dumps({"init_thoughts": init_thoughts}))
 
     while True:
@@ -88,6 +89,8 @@ def main():
             if "command" in resp:
                 if agent.tool_response != None:
                     tool_results = agent.tool_response
+                    cycle_output["tool_results"] = tool_results
+
                 if "name" in agent.staging_tool:
                     staging_tool = agent.staging_tool["name"]
                     cycle_output["staging_tool"] = staging_tool
@@ -106,7 +109,6 @@ def main():
 
                     # tool exit conditions
                     if cmd in ["task_complete", "ask_user"]:
-                        cycle_output["tool_results"] = tool_results
                         return
 
                     # next in the chain starts here
@@ -144,18 +146,22 @@ def main():
 
                     })
 
+                    this_cycle["id"] = uuid4().hex[:8]
                     print(json.dumps({"this_cycle": this_cycle}))
 
                     # cycle count exit condition
                     if cycle_output["cycle"] >= max_cycles:
-                        print(json.dumps({"message": "Max cycles reached. Terminating."}))
+                        print(json.dumps({"message": {
+                            "id": uuid4().hex[:8],
+                            "content":"Max cycles reached. Terminating."
+                        }}))
                         return
 
                     post_body = {}
                     url_param = "debug_logger"
                     endpoint = "http://localhost:5050/api/"
                     cycle_config = agent.config()
-                    post_body["init_config"] = agent_init_config
+                    post_body["init_config"] = init_state
                     post_body["init_response"] = init_resp
                     post_body["cycle_output"] = cycle_output
                     post_body["cycle_config"] = cycle_config
