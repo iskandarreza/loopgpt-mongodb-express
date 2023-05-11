@@ -7,11 +7,9 @@ const { PythonShell } = require('python-shell')
 const app = express()
 const dbo = require('./conn')
 
+// socket.io setup
 const server = http.createServer(app)
 const io = require('socket.io')(server)
-
-const multer = require("multer")
-const upload = multer({ dest: "uploads/" })
 
 io.engine.on('initial_headers', (headers, req) => {
   headers['Access-Control-Allow-Origin'] = 'http://localhost:3000'
@@ -24,6 +22,21 @@ io.engine.on('headers', (headers, req) => {
 Object.keys(io.sockets.sockets).forEach(function (s) {
   io.sockets.sockets[s].disconnect(true)
 })
+
+
+// file upload setup
+const multer = require("multer")
+const path = require('path')
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)) 
+  }
+})
+const upload = multer({ storage: storage })
+
 
 app.use(cors())
 app.use(
@@ -51,14 +64,21 @@ app.post('/start-chat', async (req, res) => {
   res.status(200).json(response)
 })
 
-app.post('/restore-agent-config', (req, res) => {
+app.post('/restore-agent-config', upload.single("file"), async(req, res) => {
   const file = req.file;
   const filePath = file.path;
+  const fullPath = path.join(__dirname, filePath);
 
   // Read the file to a const
-  const data = require(filePath);
-
-  res.send(data);
+  try {
+    const data = require(fullPath);
+    console.log({file, fullPath})
+    console.log(data)
+    res.json({success: true, data});
+  
+  } catch (error) {
+    res.json({success: false, error});
+  }
 })
 
 io.on('connection', (socket) => {

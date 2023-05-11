@@ -16,6 +16,7 @@ args = parser.parse_args()
 
 sys.stdout.reconfigure(encoding='utf-8')
 
+print(f'started script with args: {args}')
 
 def post_data(data: dict, url_params: str, url: str):
     headers = {
@@ -45,7 +46,7 @@ def main():
     cycle_output = {}
     cycle_output["cycle"] = 1
     cycle_id = uuid4().hex[:8]
-    max_cycles = int(args.max_cycles)
+    max_cycles = args.max_cycles
 
     init_state = agent.config()
     init_state["id"] = uuid4().hex[:8]
@@ -174,7 +175,7 @@ def main():
                     cycle_output["cycle"] += 1
 
                     # cycle count exit condition
-                    if cycle_output["cycle"] >= max_cycles:
+                    if cycle_output["cycle"] > max_cycles:
                         print(json.dumps({"message": {
                             "id": uuid4().hex[:8],
                             "content":"Max cycles reached. Terminating."
